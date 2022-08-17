@@ -1,0 +1,72 @@
+
+$off: #534945;
+$on: #A2184A;
+@mixin gradient($clr1, $clr2){
+	background-color:$clr1;
+   background-image: linear-gradient(315deg, $clr1 0%, $clr2 74%);
+}
+
+
+html,
+body {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#renderCanvas {
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+#controls {
+    position: absolute;
+    top: 0;
+    font-size:4vh;
+    text-align: center;
+    width: 100%;
+    //@include gradient(#004068, #90618E);
+    background:white;
+    font-family: 'Rubik', sans-serif;
+    ;
+}
+#legend{
+    position: absolute;
+    top: 0;
+    left:0;
+    padding: 1em;
+
+}
+
+#controls {
+    a {
+        padding: 0.2em;
+        text-align: center;
+        text-decoration: none;
+        color:$on;
+
+    }
+    #explode, #return { font-size:6vh;}
+    svg{width:0.8em;
+        path{fill:white}
+    }
+    #in {
+        svg {
+            path {
+                fill: $on;
+            }
+        }
+    }
+        #out {
+            cursor:auto;
+            svg {
+                path {
+                    fill: $off;
+                }
+            }
+        }
+        #return{color:$off; cursor: auto;}
+    }

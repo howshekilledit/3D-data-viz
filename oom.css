@@ -1,0 +1,62 @@
+html,
+body {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#renderCanvas {
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+#controls {
+  position: absolute;
+  top: 0;
+  font-size: 4vh;
+  text-align: center;
+  width: 100%;
+  background: white;
+  font-family: "Rubik", sans-serif;
+}
+
+#legend {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 1em;
+}
+
+#controls a {
+  padding: 0.2em;
+  text-align: center;
+  text-decoration: none;
+  color: #A2184A;
+}
+#controls #explode, #controls #return {
+  font-size: 6vh;
+}
+#controls svg {
+  width: 0.8em;
+}
+#controls svg path {
+  fill: white;
+}
+#controls #in svg path {
+  fill: #A2184A;
+}
+#controls #out {
+  cursor: auto;
+}
+#controls #out svg path {
+  fill: #534945;
+}
+#controls #return {
+  color: #534945;
+  cursor: auto;
+}
+
+/*# sourceMappingURL=oom.css.map */
