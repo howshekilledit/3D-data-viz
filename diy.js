@@ -47,8 +47,8 @@ var createScene = function () {
     var colors = ['#348888', '#FA7F08']
 
     //add inputs
-    var v1 = addInput(10, 100, colors[1]);
-    var v2 = addInput(100, 200, colors[0]);
+    var v1 = addInput(10, 40, colors[1]);
+    var v2 = addInput(100, 80, colors[0]);
     var vs = [10, 100]; //initialize value
     //camera
     var camera = new BABYLON.FreeCamera("camera1", BABYLON.Vector3.Zero(), scene);;
@@ -89,28 +89,30 @@ var createScene = function () {
 
         var t = new stack(vs, false, colors);
 
-        var campos = t.chunks[0].dim.multiply(new BABYLON.Vector3(1.8, 2, 1.8));
-        if (campos.z > campos.x) {
-            campos.x *= (campos.z / campos.x);
-        }
+        var campos = t.chunks[0].dim.multiply(new BABYLON.Vector3(2, 2.1, 2));
+
 
         camera.position = campos;
 
         // This targets the camera to scene origin
         camera.setTarget(BABYLON.Vector3.Zero());
 
-        pt_light.position = campos.multiply(new BABYLON.Vector3(1.2, 1, 2, 1.2));
+        pt_light.position = campos.multiply(new BABYLON.Vector3(1.2, 1, 2));
         hem_light.position = campos;
         t.placeBlocks();
+        if (campos.z > campos.x) {
+            t.root.rotation.y -= Math.PI/4;
+        //     campos.x *= (campos.z / campos.x);
+        }
         if (inputVal(v1) > inputVal(v2)) {
-            v1.background = colors[0];
+            v1.color= colors[0];
             v1.shadowColor = colors[0];
-            v2.background = colors[1];
+            v2.color = colors[1];
             v2.shadowColor = colors[1];
         } else {
-            v1.background = colors[1];
+            v1.color = colors[1];
             v1.shadowColor = colors[1];
-            v2.background = colors[0];
+            v2.color = colors[0];
             v2.shadowColor = colors[0];
 
         }
@@ -126,14 +128,14 @@ var createScene = function () {
         input.height = "35px";
         input.text = placeholder;
 
-        input.background = clr;
+        input.background = "white";
         input.shadowColor = clr;
-        input.color = "white";
+        input.color = clr;
         //input.shadowOffsetX = 5
         input.shadowOffsetX = 5;
         input.shadowOffsetY = 5;
 
-        input.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT
+        input.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER
         input.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP
         input.top = top
         input.onBeforeKeyAddObservable.add((input) => {
@@ -143,7 +145,6 @@ var createScene = function () {
             }
         });
         advancedTexture.addControl(input);
-        console.log(input)
         return input;
     }
     function inputVal(input) {
