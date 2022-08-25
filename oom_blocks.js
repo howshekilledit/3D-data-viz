@@ -66,43 +66,6 @@ class stack {
             }
         }
     }
-    legend(id) { //add interactive legend to HTML element with specified ID
-        for (const [i, c] of this.chunks.entries()) {
-            var container = document.getElementById(id);
-            try {
-                c.clr = c.clr.toHexString();
-            } catch { }
-            var chunk_label = `<p><a id = 'l-${c.nest_volume}' href = 'javascript:void(0)' style = 'color:${c.clr}'>${c.sciNot}</a></p>`
-            container.innerHTML += chunk_label;
-
-        }
-        for (const [i, c] of this.chunks.entries()) {
-            document.getElementById('l-' + c.nest_volume).addEventListener('click', function () {
-
-                for (let b of c.boxes) {
-                    if (b.material.alpha == 1) {
-                        b.material.alpha = 0.7;
-                    } else {
-                        b.material.alpha = 1;
-                    }
-                }
-
-            });
-        }
-    }
-    //label chunks with custom labels or nested_volume (volume inclusive of concentric blocks)
-    label(custom_labels = false, build = true) {
-        for (let [j, c] of this.chunks.entries()) {
-            var lbl;
-            if (custom_labels) {
-                lbl = custom_labels[j];
-            } else {
-                lbl = c.nest_volume;
-            }
-            c.materials = c.boxes.map(bx => labeled_material(bx.getBoundingInfo().boundingBox.extendSize, lbl, c.clr, c.font_size));
-            if (build) { c.boxes.map((bx, i) => bx.material = c.materials[i]); }
-        }
-    }
 
     //place Blocks with instructions for how to label faces
     placeBlocks(i = false, faces = [2], wrap = true, font_size) { //optional index variable for chunk and block index
@@ -225,112 +188,17 @@ function placeBlock(dim, pos, clr = new BABYLON.Color3(Math.random(), Math.rando
     } catch { }
 
     mat.diffuseColor = clr;
-    //set which faces have dynamic texture (i.e. texture with writing)
-    let faceUV = new Array(6);
-    faceUV = faceUV.fill(new BABYLON.Vector4(0, 0, 0, 0));
-    var max_width = Math.max(dim.x, dim.z);
-    var min_width = Math.min(dim.x, dim.z);
 
-    //proportion materials based on face proportions
-    if (wrap.UV) { //if specified wrap proportions
-        faceUV = wrap.UV;
-    } else {
-        if (wrap == 'corner') { //if wrapping around front and right face
-            faceUV[2] = new BABYLON.Vector4(0, 0.45, dim.z / (dim.x + dim.z), 0.55);
-            faceUV[0] = new BABYLON.Vector4(dim.z / (dim.x + dim.z), 0.45, 1, 0.55);
-        } else {
-            for (let i of text_face) { //if wrap is array of face indices, use these default crops
-                switch (i) {
-                    case 0:
-                        faceUV[i] = cropVector(dim.x / max_width, 0.2);
-                        break;
-                    case 2:
-                        faceUV[i] = cropVector(dim.z / max_width, 0.2);
-                        break;
-                    case 4:
-                        //faceUV[i] = cropVector(min_width / max_width, 1);
-                        //faceUV[i] = cropVector(1, min_width / max_width);
-                        faceUV[i] = cropVector(min_width / dim.z, 0.5);
-                        break;
-                    default:
-                        faceUV[i] = new BABYLON.Vector4(0, 0, 0, 0); //default set face to blank
-                        break;
-                }
-            }
-        }
-    }
-
-
-
-
-
-    function cropVector(lr, tb) { //get center crop coordiantes based on proportion of section
-        lr = (1 - lr) / 2;
-        tb = (1 - tb) / 2;
-        return new BABYLON.Vector4(lr, tb, 1 - lr, 1 - tb);
-        //Vector: left x, bottom y, right x, top y
-    }
-
-
-    //write label on face or faces as specified
-
-    // if (Array.isArray(text_face)) {
-    //     for (const face of text_face) {
-    //         faceUV[face] = new BABYLON.Vector4(0, 0, 1, 1); //set selected faces to full texture
-    //     }
-    // } else {
-    //     faceUV[text_face] = new BABYLON.Vector4(0, 0, 1, 1);
-    // }
-
-    //reference, updating faceUVs: https://www.babylonjs-playground.com/#20OAV9#448
     let boxOption = {
-        faceUV: faceUV,
+
         width: dim.x, height: dim.y, depth: dim.z,
         wrap: wrap
     }
     const box = BABYLON.MeshBuilder.CreateBox("box", boxOption);
 
     box.material = mat;
-
-    //box.material = grid;
     box.position = new BABYLON.Vector3(pos.x + dim.x / 2, pos.y + dim.y / 2, pos.z + dim.z / 2);
-    //box.position = new BABYLON.Vector3(pos.x, pos.y, pos.z);
-    //box.material.wireframe = true;
+
     return box;
 
 }
-
-//returns an array of materials to apply to blocks, with different number formats
-
-function labeled_material(dim, lbl, clr, font_size = 280, font = 'Rubik') { //dimensions can be in format of Vector3 or box mesh
-
-    //var dim = bx.getBoundingInfo().boundingBox.extendSize; //get size of current block
-    if (dim.position) {//if dim is mesh, get size
-        dim = dim.getBoundingInfo().boundingBox.extendSize;
-    }
-    var w = 3000; //material width
-
-    var h = 5 * (w * dim.y / Math.max(dim.z, dim.x)); //material height
-    var dynamicTexture = new BABYLON.DynamicTexture(lbl, { width: w, height: h }, scene);
-    var material = new BABYLON.StandardMaterial();
-    material.diffuseTexture = dynamicTexture;
-    var words = lbl.split(" ");
-    if (words.length > 1) {
-        var y = 0.51 * (h - font_size * words.length);
-    } else {
-        var y = null
-    }
-    try {
-        clr = clr.toHexString();
-    } catch { }
-    for (var [i, w] of words.entries()) {
-        if (i == 0) {
-            dynamicTexture.drawText(w, null, y, `${font_size}px ${font}`, "white", clr);
-        } else {
-            dynamicTexture.drawText(w, null, y, `${font_size}px ${font}`, "white");
-        }
-        y += font_size;
-    }
-    return material;
-}
-

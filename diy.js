@@ -141,23 +141,6 @@ var createScene = function () {
         return t;
     }
 
-    // function normal() {
-    //     if (normaled == false) {
-    //         normaled = true;
-    //         n1 = (Math.min(inputVal(v1), inputVal(v2)) / Math.max(inputVal(v1), inputVal(v2))) * 1000;
-    //         n2 = 1000;
-    //         v1.text = n1 / 10;
-    //         v2.text = n2 / 10;
-    //         vs = [n1, n2];
-    //         for (var chunk of t.chunks) {
-    //             for (var box of chunk.boxes) {
-    //                 box.dispose();
-    //             }
-    //         }
-    //         t = placeStack([n1, n2], colors)
-    //     }
-    // }
-
     function addInput(placeholder, numonly = true, settings = {
         left: 0, top: 40, bg: "black", clr: "white",
         height: "35px", width: "250px", fontFamily: "Arial", fontSize: "16px"
@@ -180,7 +163,7 @@ var createScene = function () {
         input.top = settings.top;
         input.onBeforeKeyAddObservable.add((input) => {
             let key = input.currentKey;
-            if (num_only) {
+            if (numonly) {
                 if (key < "0" || key > "9") {
                     input.addKey = false;
                 }
