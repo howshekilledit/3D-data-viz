@@ -149,29 +149,7 @@ function getExp(n) { //get exponent value from scientific notation
 //so that chunks can be nested to optimal visual effect
 function dimFromVol(volume) {
     var props = { volume: volume }; //initialize properties object
-    //JS scientific notation
-    props.sciNot = volume.toExponential();
-    //coefficient and exponent from scientific notation
-    props.coeff = parseFloat(props.sciNot.slice(0, props.sciNot.indexOf('e')));
-    props.exp = parseFloat(props.sciNot.slice(props.sciNot.indexOf('e') + 1));
-
-    //generate dimensions
-    var a = Math.round(props.exp / 3);
-    var b = a;
-    var c = props.exp - a - b;
-    a = Math.abs(Math.pow(10, a));
-    b = Math.abs(Math.pow(10, b));
-    c = Math.abs(Math.pow(10, c));
-    //apply coefficent to smaller piece (so sides are as close together as possible
-    //GIVEN two sides are divisible by highest possible exponents of ten)
-    if (a > c) {
-        c *= props.coeff;
-    } else {
-        a *= props.coeff;
-    }
-    //sort dimensions
-    var ds = [a, b, c].sort((a, b) => (a - b));
-    props.dim = new BABYLON.Vector3(ds[0], ds[1], ds[2]);
+    props.dim = new BABYLON.Vector3(Math.cbrt(volume), Math.cbrt(volume), Math.cbrt(volume));
     return props;
 }
 

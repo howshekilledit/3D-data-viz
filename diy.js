@@ -45,31 +45,11 @@ var createScene = function () {
 
     //define colors for legend abd block
     var colors = ['#348888', '#FA7F08']
+    var v1, v2;
 
-    //add inputs
 
-    var v1_settings = {
-        left: -150, top: 80, bg: colors[1], clr: "white",
-        height: "35px", width: "250px", fontFamily: "Arial", fontSize: "16px"
-    };
-    var v1 = addInput(10, true, v1_settings);
-    var v2_settings = v1_settings;
-    v2_settings.left = 150;
-    v2_settings.bg = colors[0];
-    var v2 = addInput(100, true, v2_settings);
-    var l1_settings = v1_settings;
-    l1_settings.top = 40;
-    l1_settings.bg = "white";
-    l1_settings.clr = colors[1];
-    l1_settings.left = -150;
-    var l1 = addInput('Label 1', false, l1_settings);
-    var l2_settings = l1_settings;
-    l2_settings.bg = "white";
-    l2_settings.clr = colors[0];
-    l2_settings.left = 150;
-    var l2 = addInput('Label 2', false, l2_settings);
     // var l2 = addInput('Click # below to change it', 150, 40, colors[0]);
-    var vs = [10, 100]; //initialize value
+    var vs = [1, 1000]; //initialize value
     //camera
     var camera = new BABYLON.FreeCamera("camera1", BABYLON.Vector3.Zero(), scene);;
 
@@ -79,26 +59,43 @@ var createScene = function () {
     pt_light = new BABYLON.PointLight("pointLight", BABYLON.Vector3.Zero(), scene);
     pt_light.intensity = 1.5;
 
+    //add inputs
+    var v1_settings = {
+        left: -125, top: 80, bg: colors[1], clr: "white",
+        height: "35px", width: "250px", fontFamily: "Arial", fontSize: "16px",
+        hl: '#c86506'
+    };
+    v1 = addInput(1, true, v1_settings);
+    var v2_settings = v1_settings;
+    v2_settings.left = 125;
+    v2_settings.bg = colors[0];
+    v2_settings.hl = '#2a6d6d';
+    v2 = addInput(1000, true, v2_settings);
+    var l1_settings = v1_settings;
+    l1_settings.hl = 'yellow';
+    l1_settings.top = 40;
+    l1_settings.bg = "white";
+    l1_settings.clr = colors[1];
+    l1_settings.left = -125;
+    var l1 = addInput('Label 1', false, l1_settings);
+    var l2_settings = l1_settings;
+    l2_settings.bg = "white";
+    l2_settings.clr = colors[0];
+    l2_settings.left = 125;
+    var l2 = addInput('Label 2', false, l2_settings);
+    scene.executeWhenReady(function () {
+        //add inputs
+
+        var title_settings = {
+            left: 0, top: 0, bg: "white", clr: "black",
+            height: "40px", fontFamily: "Rubik", fontSize: "30px", stroke: "0px"
+        };
+        var title = addInput('Click any field to change it', false, title_settings)
+    });
 
     scene.clearColor = BABYLON.Color3.White(); //white background
 
     var t = placeStack(vs, colors);
-
-    scene.executeWhenReady(function () {
-        var lb = 0;
-        //t.chunks[1].boxes[lb].material = t.chunks[1].materials[lb];
-        // document.getElementById('rt').addEventListener('click', function () {
-        //     t.root.rotation.y += 0.1
-        // });
-        // document.getElementById('lft').addEventListener('click', function () {
-        //     t.root.rotation.y -= 0.1
-        // });
-
-
-
-
-
-    });
 
     function placeStack(vs, colors) {
         var max = Math.max(...vs);
@@ -108,7 +105,7 @@ var createScene = function () {
             vs = vs.map(x => x / Math.pow(10, exp));
         }
 
-        var t = new stack(vs, false, colors);
+        var t = new stack(vs, false, colors, new BABYLON.Vector3(0, 0, 0));
 
         var campos = t.chunks[0].dim.multiply(new BABYLON.Vector3(2, 2.1, 2));
 
@@ -147,16 +144,25 @@ var createScene = function () {
     }) {
         // Height Input
         var input = new BABYLON.GUI.InputText("input");
-        input.width = settings.width;
-        input.maxWidth = 0.2;
+        if (settings.width) { input.width = settings.width; }
+        input.maxWidth = 1;
         input.height = settings.height;
         input.text = placeholder;
-
+        if (settings.stroke) {
+            input.thickness = settings.stroke;
+        }
         input.fontWeight = 'bold';
+        input.fontFamily = settings.fontFamily;
+        input.fontSize = settings.fontSize;
         input.background = settings.bg;
         input.color = settings.clr;
 
+        if (settings.hl) {
+            input.focusedBackground = settings.hl;
+        } else {
+            input.focusedBackground = "yellow";
 
+        }
         input.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
         input.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
         input.left = settings.left;
