@@ -24,6 +24,8 @@ var createScene = function () {
     var normaled; //boolean to toggle normalized
     //redo viz based on user inputs
     scene.registerBeforeRender(function () {
+        v1.text =  v1.text.replace(/\D/g,'');
+        v2.text = v2.text.replace(/\D/g,'');
         var val1 = inputVal(v1);
         var val2 = inputVal(v2);
         if ((vs.indexOf(val1) == -1) | (vs.indexOf(val2) == -1)) {
@@ -127,14 +129,19 @@ var createScene = function () {
             l2.color = colors[1];
             v1.background = colors[0];
             v2.background = colors[1];
+            v2.focusedBackground = '#c86506';
+            v1.focusedBackground = '#2a6d6d';
+
         } else {
             l1.color = colors[1];
             l2.color = colors[0];
             v1.background = colors[1];
             v2.background = colors[0];
+            v1.focusedBackground = '#c86506';
+            v2.focusedBackground = '#2a6d6d';
 
         }
-
+        console.log(t);
         return t;
     }
 
@@ -167,13 +174,13 @@ var createScene = function () {
         input.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
         input.left = settings.left;
         input.top = settings.top;
-        input.onBeforeKeyAddObservable.add((input) => {
-            let key = input.currentKey;
-            if (numonly) {
-                if (key < "0" || key > "9") {
-                    input.addKey = false;
-                }
-            }
+        input.onBeforeKeyAddObservable.add((inp) => {
+            let key = inp.currentKey;
+            // if (numonly) {
+            //     if (key < "0" || key > "9") {
+            //         inp.addKey = false;
+            //     }
+            // }
         });
         advancedTexture.addControl(input);
         return input;

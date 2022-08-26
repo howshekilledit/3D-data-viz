@@ -6,7 +6,7 @@ class stack {
     constructor(volumes, font_size = false, colors = false, origin = new BABYLON.Vector3.Zero()) {
         volumes = volumes.sort((a, b) => b - a);
         this.origin = origin;
-        this.chunks = volumes.map(v => dimFromVol(v));
+        this.chunks = volumes.map((v, i) => dimFromVol(v, (i == 0), volumes[0]));
         for (var i = 0; i < this.chunks.length - 1; i++) {
             var this_chunk = this.chunks[i].dim;
             var next_chunk = this.chunks[i + 1].dim;
@@ -30,7 +30,7 @@ class stack {
             } else {
                 chunk.clr = new BABYLON.Color3(Math.random(), Math.random(), Math.random());
             }
-            if(font_size){
+            if (font_size) {
                 chunk.font_size = font_size[i];
             }
             chunk.nest_volume = chunk.volume; //volume including child chunks
@@ -41,7 +41,7 @@ class stack {
                 chunkpos = this.origin;
             } else {
                 //add dimensions of last block to position and subtract dimension of current block
-                chunkpos = this.chunks[i - 1].blocks[this.chunks[i - 1].blocks.length-1].pos.add(this.chunks[i - 1].blocks[this.chunks[i - 1].blocks.length-1].dim).subtract(chunk.dim);
+                chunkpos = this.chunks[i - 1].blocks[this.chunks[i - 1].blocks.length - 1].pos.add(this.chunks[i - 1].blocks[this.chunks[i - 1].blocks.length - 1].dim).subtract(chunk.dim);
             }
             //break current chunk into blocks based on size of next chunk
             //(if it's the last/smallest chunk, only one block is needed)
@@ -50,7 +50,7 @@ class stack {
                 var next_chunk = this.chunks[i + 1];
                 for (const d of ['x', 'y', 'z']) {
                     if (next_chunk.dim[d] != chunk.dim[d]) {
-                        var last_block = chunk.blocks[chunk.blocks.length-1];
+                        var last_block = chunk.blocks[chunk.blocks.length - 1];
                         var new_block = {
                             dim: new BABYLON.Vector3(last_block.dim.x, last_block.dim.y, last_block.dim.z),
                             pos: new BABYLON.Vector3(last_block.pos.x, last_block.pos.y, last_block.pos.z)
@@ -78,7 +78,7 @@ class stack {
             var chunk = this.chunks[i[0]];
             var blck = chunk.blocks[i[1]];
             chunk.boxes = [placeBlock(blck.dim, blck.pos, chunk.clr)];
-            chunk.boxes[chunk.boxes.length-1].parent = this.root;
+            chunk.boxes[chunk.boxes.length - 1].parent = this.root;
 
         } else {
             for (const [k, chunk] of this.chunks.entries()) {
@@ -100,27 +100,27 @@ class stack {
                             wp = wrp[j];
                         } else {
                             wp = wrp;
-                            if(wp.ref){ //generate texture wrap coordinates based on wrap object
+                            if (wp.ref) { //generate texture wrap coordinates based on wrap object
                                 var tot_w = 0;
                                 let faceUV = new Array(6);
                                 faceUV = faceUV.fill(new BABYLON.Vector4(0, 0, 0, 0));
                                 //get y reference
-                                var these_blocks = chunk.blocks.filter((b, k) => wp.ref.map(x => x.i).indexOf(k)>0);
+                                var these_blocks = chunk.blocks.filter((b, k) => wp.ref.map(x => x.i).indexOf(k) > 0);
                                 var max_y = Math.max(...these_blocks.map(b => b.dim.y));
                                 wp.ref.map(ref => tot_w += chunk.blocks[ref.i].dim[ref.d]);
                                 var pos = 0
-                                for(let ref of wp.ref){
-                                    if(ref.i == j){ //if current block
-                                        var leftpos = pos/tot_w;
-                                        var map_ref = (max_y - blck.dim.y)/max_y
-                                        var bot = 0.45 + (0.025 - 0.05)*map_ref;
-                                        var top = 0.55 - (0.025 + 0.05)*map_ref;
-                                        var rightpos = (pos + chunk.blocks[ref.i].dim[ref.d])/tot_w;
+                                for (let ref of wp.ref) {
+                                    if (ref.i == j) { //if current block
+                                        var leftpos = pos / tot_w;
+                                        var map_ref = (max_y - blck.dim.y) / max_y
+                                        var bot = 0.45 + (0.025 - 0.05) * map_ref;
+                                        var top = 0.55 - (0.025 + 0.05) * map_ref;
+                                        var rightpos = (pos + chunk.blocks[ref.i].dim[ref.d]) / tot_w;
                                         faceUV[ref.UV] = new BABYLON.Vector4(leftpos, bot, rightpos, top);
                                     }
                                     pos += chunk.blocks[ref.i].dim[ref.d];
                                 }
-                                wp = {UV: faceUV};
+                                wp = { UV: faceUV };
                                 // console.log(tot_w);
 
                             }
@@ -131,7 +131,7 @@ class stack {
                             chunk.boxes.push(placeBlock(blck.dim, blck.pos, chunk.clr, [], wp, font_size));
 
                         }
-                        chunk.boxes[chunk.boxes.length-1].parent = this.root;
+                        chunk.boxes[chunk.boxes.length - 1].parent = this.root;
                     }
                 }
 
@@ -147,9 +147,65 @@ function getExp(n) { //get exponent value from scientific notation
 
 //generate dimensions from volume
 //so that chunks can be nested to optimal visual effect
-function dimFromVol(volume) {
+function dimFromVol(volume, cube = false, tot_vol = false) {
     var props = { volume: volume }; //initialize properties object
-    props.dim = new BABYLON.Vector3(Math.cbrt(volume), Math.cbrt(volume), Math.cbrt(volume));
+    //JS scientific notation
+    props.sciNot = volume.toExponential();
+    //coefficient and exponent from scientific notation
+    props.coeff = parseFloat(props.sciNot.slice(0, props.sciNot.indexOf('e')));
+    props.exp = parseFloat(props.sciNot.slice(props.sciNot.indexOf('e') + 1));
+
+    if (cube)
+        props.dim = new BABYLON.Vector3(Math.cbrt(volume), Math.cbrt(volume), Math.cbrt(volume));
+    else {
+
+        //generate dimensions
+        var a = Math.round(props.exp / 3);
+        var b = a;
+        var c = props.exp - a - b;
+        a = Math.abs(Math.pow(10, a));
+        b = Math.abs(Math.pow(10, b));
+        c = Math.abs(Math.pow(10, c));
+        //apply coefficent to smaller piece (so sides are as close together as possible
+        //GIVEN two sides are divisible by highest possible exponents of ten)
+        if (a > c) {
+            c *= props.coeff;
+        } else {
+            a *= props.coeff;
+        }
+        //sort dimensions
+        var ds = [a, b, c].sort((a, b) => (a - b));
+        props.dim = new BABYLON.Vector3(ds[0], ds[1], ds[2]);
+        var parent_dim = Math.cbrt(tot_vol); //get max length of any leg
+        var excess = 1;
+        //console.log(props.dim);
+        for (const d of ['z', 'x', 'y']) {
+            if (props.dim[d] > parent_dim) {
+                excess *= (props.dim[d] / parent_dim);
+                props.dim[d] /= (props.dim[d] / parent_dim);
+            } else {
+                if (props.dim[d] * excess <= parent_dim) {
+                    props.dim[d] *= excess;
+                    excess = 1;
+                } else {
+                    props.dim[d] *= Math.sqrt(excess);
+                    excess = Math.sqrt(excess);
+                }
+            }
+        }
+        //if sum in wrong or any limbs are too large, sqare to parent volume
+        if (([props.dim.x, props.dim.y, props.dim.z].filter(d => d > parent_dim).length > 0) ||
+         (Math.ceil(props.dim.x * props.dim.y * props.dim.z) < Math.floor(volume))) {
+
+            var a = Math.cbrt(tot_vol);
+            var b = Math.cbrt(tot_vol);
+            var c = volume / (a * b);
+            var ds = [a, b, c].sort((a, b) => (a - b));
+            props.dim = new BABYLON.Vector3(ds[0], ds[1], ds[2]);
+
+
+        }
+    }
     return props;
 }
 
