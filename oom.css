@@ -60,4 +60,22 @@ body {
   cursor: auto;
 }
 
+.footer{
+  position:absolute;bottom:10px;left:10px;
+  font-family:Helvetica, Arial, sans-serif;
+  font-size:12px;
+
+}
+
+.footer>a, .footer>a:link, .footer>a:visited{
+  text-decoration:none;
+  font-weight:bold;
+  color: gray;
+
+  padding:0 1em;
+}
+@media screen and (max-width: 600px) {
+  .footer>a{display:block}
+  .footer{text-align:center}
+}
 /*# sourceMappingURL=oom.css.map */
